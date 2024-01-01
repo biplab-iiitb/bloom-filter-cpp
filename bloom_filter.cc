@@ -20,6 +20,7 @@ private:
 public:
   BloomFilter(size_t expected_num_elements, double false_positive_rate) {
     num_elements_ = 0;
+    
     num_hash_functions_ = static_cast<size_t>(
         std::ceil(-(std::log(false_positive_rate) / std::log(2))));
     filter_size_ = static_cast<size_t>(
@@ -27,13 +28,12 @@ public:
                   (std::log(2) * std::log(2))));
 
     filter_.resize(filter_size_, false);
-
+    std::hash<std::string> hash_function;
     // Generate hash functions
     for (size_t i = 0; i < num_hash_functions_; i++) {
       hash_functions_.push_back([=](const std::string &key) {
-        std::hash<std::string> hash_function;
-        size_t hash = hash_function(key);
-        return (hash + i) % filter_size_;
+        size_t hash = hash_function(key + std::to_string(i));
+        return hash % filter_size_;
       });
     }
   }
